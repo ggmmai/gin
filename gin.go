@@ -669,6 +669,10 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c.Request = req
 	c.reset()
 
+	/******************************** by 微有 开发者: 疯狂的IT世界 微有官网: www.ggmmai.com  微信or手机号: 18818586318 ********************************/
+	c.RewritePath()
+	/******************************** by 微有 开发者: 疯狂的IT世界 微有官网: www.ggmmai.com  微信or手机号: 18818586318 ********************************/
+
 	engine.handleHTTPRequest(c)
 
 	engine.pool.Put(c)
