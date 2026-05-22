@@ -1,22 +1,15 @@
 package gin
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 )
 
-func (c *Context) RewritePath() {
-	module := strings.ToLower(c.DefaultQuery("m", "xiangqin"))
-	controller := strings.ToLower(c.DefaultQuery("c", "index"))
-	action := strings.ToLower(c.DefaultQuery("do", "index"))
-	home_admin := strings.ToLower(c.DefaultQuery("mm", "home"))
-
-	Path := c.Request.URL.Path
-	path := fmt.Sprintf("/%v/%s/%v/%v", module, home_admin, controller, action)
-	if Path == "/" || strings.HasPrefix(Path, "/pages") {
-		c.Request.URL.Path = path
-	}
+type Runtimes struct {
+	Pt         uint
+	Module     string
+	Controller string
+	Action     string
+	Home_admin string
 }
 
 func (c *Context) Pt() uint {

@@ -658,6 +658,8 @@ func (engine *Engine) RunListener(listener net.Listener) (err error) {
 	return
 }
 
+var RewritePath func(*Context)
+
 // ServeHTTP conforms to the http.Handler interface.
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	engine.routeTreesUpdated.Do(func() {
@@ -670,7 +672,9 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c.reset()
 
 	/******************************** by 微有 开发者: 疯狂的IT世界 微有官网: www.ggmmai.com  微信or手机号: 18818586318 ********************************/
-	c.RewritePath()
+	if RewritePath != nil {
+		RewritePath(c)
+	}
 	/******************************** by 微有 开发者: 疯狂的IT世界 微有官网: www.ggmmai.com  微信or手机号: 18818586318 ********************************/
 
 	engine.handleHTTPRequest(c)
