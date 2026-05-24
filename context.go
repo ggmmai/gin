@@ -99,6 +99,7 @@ type Context struct {
 	Uid      uint
 	User     map[string]any
 	Config   map[string]any
+	Claims   map[string]any
 	Runtimes *Runtimes
 }
 
