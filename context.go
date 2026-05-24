@@ -96,6 +96,7 @@ type Context struct {
 	sameSite http.SameSite
 
 	Pt       uint
+	Uid      uint
 	User     map[string]any
 	Config   map[string]any
 	Runtimes *Runtimes
