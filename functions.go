@@ -12,18 +12,6 @@ type Runtimes struct {
 	Home_admin string
 }
 
-func (c *Context) Pt() uint {
-	pt := struct {
-		Id uint
-	}{}
-
-	if err := c.ShouldBindQuery(&pt); err != nil || pt.Id == 0 {
-		pt.Id = 1
-	}
-
-	return pt.Id
-}
-
 type response struct {
 	Code int8   `json:"code"`
 	Msg  string `json:"msg"`

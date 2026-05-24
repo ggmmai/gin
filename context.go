@@ -95,6 +95,9 @@ type Context struct {
 	// the browser to send this cookie along with cross-site requests.
 	sameSite http.SameSite
 
+	Pt       uint
+	User     map[string]any
+	Conifg   map[string]any
 	Runtimes *Runtimes
 }
 
