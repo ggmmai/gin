@@ -97,7 +97,7 @@ type Context struct {
 
 	Pt       uint
 	User     map[string]any
-	Conifg   map[string]any
+	Config   map[string]any
 	Runtimes *Runtimes
 }
 
