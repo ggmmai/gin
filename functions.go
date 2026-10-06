@@ -5,20 +5,20 @@ import (
 )
 
 type Runtimes struct {
-	Pt         uint
+	Pt         int
 	Module     string
 	Controller string
 	Action     string
-	Home_admin string
+	HomeAdmin  string
 }
 
 type response struct {
-	Code int8   `json:"code"`
+	Code int   `json:"code"`
 	Msg  string `json:"msg"`
 	Data any    `json:"data,omitempty"`
 }
 
-func (c *Context) Result(code int8, msg string, value ...any) {
+func (c *Context) Result(code int, msg string, value ...any) {
 	var data any
 	if len(value) == 0 {
 		data = nil
