@@ -97,9 +97,9 @@ type Context struct {
 
 	Pt        int
 	Uid       int
-	User      *any
-	Config    *any
-	Claims    *any
+	User      map[string]any
+	Config    map[string]any
+	Claims    map[string]any
 	Runtimes  *Runtimes
 	Timestamp int64
 }
