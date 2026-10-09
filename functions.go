@@ -3,6 +3,8 @@ package gin
 import (
 	"net/http"
 	"path"
+
+	"github.com/gin-gonic/gin/orm"
 )
 
 type Runtimes struct {
@@ -177,4 +179,15 @@ func CertPath(c *Context) string {
 	module := c.Runtimes.Module
 	rootPath := c.Runtimes.RootPath
 	return path.Join(rootPath, "uploads", module, "cert")
+}
+
+func (c *Context) D(table string) *orm.Builder {
+	if orm.OrmPool == nil {
+		panic("orm: default connection is not set, call orm.OrmOpen first")
+	}
+
+	if orm.OrmPrefix != "" {
+		table = orm.OrmPrefix + table
+	}
+	return orm.NewBuilder(orm.OrmPool, table)
 }
