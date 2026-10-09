@@ -18,7 +18,6 @@ type OrmConfig struct {
 	Prefix    string
 	Charset   string
 	Collation string
-	Dsn       string
 	// MaxOpenConns 最大打开连接数（含正在使用 + 空闲）。超出后新请求会等待；0 表示使用默认值 20
 	MaxOpenConns int
 	// MaxIdleConns 最大空闲连接数，池中保持待命、可复用的连接上限；过大占资源，过小频繁建连。0 表示默认 20
@@ -42,11 +41,10 @@ func (o *OrmConfig) getDsn() string {
 		o.Port = 3306
 	}
 
-	o.Dsn = fmt.Sprintf(
+	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=Local", // 如 user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=true&loc=Local
 		o.Username, o.Password, o.Host, o.Port, o.Database,
 	)
-	return o.Dsn
 }
 
 // OrmPool 是 D("table") 使用的默认连接池。OrmOpen 成功后写入。
@@ -54,11 +52,7 @@ var OrmPool *sql.DB
 var OrmPrefix string
 
 func (cfg *OrmConfig) OrmOpen() (*sql.DB, error) {
-	if cfg.getDsn() == "" {
-		return nil, fmt.Errorf("orm: empty dsn")
-	}
-
-	db, err := sql.Open("mysql", cfg.Dsn)
+	db, err := sql.Open("mysql", cfg.getDsn())
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +85,15 @@ func (cfg *OrmConfig) OrmOpen() (*sql.DB, error) {
 	OrmPool = db
 	OrmPrefix = cfg.Prefix
 	return db, nil
+}
+
+func SetOrmPool(db *sql.DB, prefix string) {
+	OrmPool = db
+	OrmPrefix = prefix
+}
+
+func GetOrmPool() (*sql.DB, string) {
+	return OrmPool, OrmPrefix
 }
 
 // D 使用默认连接创建查询构造器

@@ -191,3 +191,12 @@ func (c *Context) D(table string) *orm.Builder {
 	}
 	return orm.NewBuilder(orm.OrmPool, table)
 }
+
+
+func (c *Context) GetConfig[T]() *T {
+	if c.Config != nil {
+		return c.Config.(*T)
+	} else {
+		return D("config").Where("id", c.Pt).FindInto[T]()
+	}
+}
