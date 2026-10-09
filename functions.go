@@ -193,7 +193,7 @@ func (c *Context) D(table string) *orm.Builder {
 }
 
 
-func (c *Context) GetConfig[T]() *T {
+func (c *Context) GetConfig[T any]() *T {
 	if c.Config != nil {
 		return c.Config.(*T)
 	} else {
