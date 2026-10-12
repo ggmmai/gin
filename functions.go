@@ -181,7 +181,9 @@ func CertPath(c *Context) string {
 	return path.Join(rootPath, "uploads", module, "cert")
 }
 
-func (c *Context) D(table string) *orm.Builder {
+type OrmBuilder = orm.Builder
+
+func (c *Context) D(table string) *OrmBuilder {
 	if orm.OrmPool == nil {
 		panic("orm: default connection is not set, call orm.OrmOpen first")
 	}
