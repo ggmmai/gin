@@ -183,18 +183,10 @@ func CertPath(c *Context) string {
 
 type OrmBuilder = orm.Builder
 
-func (c *Context) D(table string) *OrmBuilder {
-	if orm.OrmPool == nil {
-		panic("orm: default connection is not set, call orm.OrmOpen first")
-	}
-
-	return orm.NewBuilder(orm.OrmPool, c.Runtimes.Module+"_"+table)
+func D(table string) *OrmBuilder {
+	return orm.D(table)
 }
 
-func D(table string) *OrmBuilder {
-	if orm.OrmPool == nil {
-		panic("orm: default connection is not set, call orm.OrmOpen first")
-	}
-
-	return orm.NewBuilder(orm.OrmPool, table)
+func (c *Context) D(table string) *OrmBuilder {
+	return orm.D(c.Runtimes.Module + "_" + table)
 }
