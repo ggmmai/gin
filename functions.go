@@ -3,6 +3,9 @@ package gin
 import (
 	"net/http"
 	"path"
+	"sync"
+
+	"github.com/gin-gonic/gin/orm"
 )
 
 type Runtimes struct {
@@ -179,6 +182,97 @@ func CertPath(c *Context) string {
 	return path.Join(rootPath, "uploads", module, "cert")
 }
 
-func (c *Context) D(table string) string {
-	return c.Runtimes.Module + "_" + table
+type OrmBuilder = orm.OrmBuilder
+
+func D(table string) *OrmBuilder {
+	return orm.D(table)
+}
+
+func (c *Context) D(table string) *OrmBuilder {
+	return orm.D(c.Runtimes.Module + "_" + table)
+}
+
+// c.Set / c.Get 的键放在 map[any]any 里，比较时类型和值都要相同。
+// entityKey("config:get") 和字符串 "config:get" 不是同一个键，业务里的 c.Set("config:get", ...) 不会覆盖这里的回调。
+type entityKey string
+
+// EntityCache 返回实体缓存中间件。sync.Map 在注册时创建一次，所有请求共用。
+// 每次请求再生成带上当前 Context 的回调，查询走 c.D。同一份返回值挂到多个路由组时共用同一张缓存。
+func EntityCache[T any](table string) HandlerFunc {
+	cache := sync.Map{}
+	getKey := entityKey(table + ":get")
+	delKey := entityKey(table + ":del")
+	return func(c *Context) {
+		c.Set(getKey, func(id int) *T {
+			if value, ok := cache.Load(id); ok {
+				return value.(*T)
+			}
+			row, err := c.D(table).Where("id", id).FindInto[T]()
+			if err != nil {
+				return nil
+			}
+			cache.Store(id, row)
+			return row
+		})
+		c.Set(delKey, func(id int) {
+			cache.Delete(id)
+		})
+		c.Next()
+	}
+}
+
+func entityGet[T any](c *Context, table string, id int) *T {
+	value, ok := c.Get(entityKey(table + ":get"))
+	if !ok {
+		panic("未注册实体缓存中间件: " + table)
+	}
+	get, ok := value.(func(int) *T)
+	if !ok {
+		panic("实体缓存类型不匹配: " + table)
+	}
+	return get(id)
+}
+
+func entityDelete(c *Context, table string, id int) {
+	value, ok := c.Get(entityKey(table + ":del"))
+	if !ok {
+		panic("未注册实体缓存中间件: " + table)
+	}
+	del, ok := value.(func(int))
+	if !ok {
+		panic("实体缓存类型不匹配: " + table)
+	}
+	del(id)
+}
+
+func (c *Context) GetConfig[T any](ids ...int) *T {
+	id := c.Pt
+	if len(ids) > 0 {
+		id = ids[0]
+	}
+	return entityGet[T](c, "config", id)
+}
+
+func (c *Context) DeleteConfig(ids ...int) {
+	id := c.Pt
+	if len(ids) > 0 {
+		id = ids[0]
+	}
+	entityDelete(c, "config", id)
+}
+
+func (c *Context) GetUser[T any](id int) *T {
+	return entityGet[T](c, "user", id)
+}
+
+func (c *Context) DeleteUser(id int) {
+	entityDelete(c, "user", id)
+}
+
+func (c *Context) GetAdministrator[T any](id int) *T {
+	return entityGet[T](c, "admin", id)
+}
+
+func (c *Context) DeleteAdministrator(id int) {
+	entityDelete(c, "admin", id)
 }
