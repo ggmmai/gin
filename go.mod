@@ -4,7 +4,6 @@ go 1.27.1
 
 require (
 	github.com/bytedance/sonic v1.15.0
-	github.com/ggmmai/orm v0.1.2
 	github.com/gin-contrib/sse v1.1.0
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/goccy/go-json v0.10.6

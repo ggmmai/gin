@@ -3,8 +3,6 @@ package gin
 import (
 	"net/http"
 	"path"
-
-	"github.com/ggmmai/orm"
 )
 
 type Runtimes struct {
@@ -181,12 +179,6 @@ func CertPath(c *Context) string {
 	return path.Join(rootPath, "uploads", module, "cert")
 }
 
-type OrmBuilder = orm.Builder
-
-func D(table string) *OrmBuilder {
-	return orm.D(table)
-}
-
-func (c *Context) D(table string) *OrmBuilder {
-	return orm.D(c.Runtimes.Module + "_" + table)
+func (c *Context) D(table string) string {
+	return c.Runtimes.Module + "_" + table
 }
