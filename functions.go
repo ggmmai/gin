@@ -188,9 +188,13 @@ func (c *Context) D(table string) *OrmBuilder {
 		panic("orm: default connection is not set, call orm.OrmOpen first")
 	}
 
-	table = c.Runtimes.Module + "_" + table
-	if orm.OrmPrefix != "" {
-		table = orm.OrmPrefix + table
+	return orm.NewBuilder(orm.OrmPool, c.Runtimes.Module+"_"+table)
+}
+
+func D(table string) *OrmBuilder {
+	if orm.OrmPool == nil {
+		panic("orm: default connection is not set, call orm.OrmOpen first")
 	}
+
 	return orm.NewBuilder(orm.OrmPool, table)
 }
