@@ -30,16 +30,26 @@ func logSQLError(err error, sqlStr string, args any) {
 	writeSQLError(msg)
 }
 
-// DelaySQLErrorLog 把当前请求里的 SQL 错误留到返回的函数被调用时再写出。
-// 访问日志在请求结束后才写，先留住错误，就能排在访问日志后面。
+// DelaySQLErrorLog 把当前请求里的 SQL 错误和 log 输出留到返回的函数被调用时再写出。
+// 访问日志在请求结束后才写，先留住这些内容，就能排在访问日志后面。
 func DelaySQLErrorLog() func() {
 	gid := currentGID()
 	buf := &sqlErrorBuf{}
 	sqlErrorBufs.Store(gid, buf)
 	return func() {
-		buf.flush()
 		sqlErrorBufs.Delete(gid)
+		buf.flush()
 	}
+}
+
+// CaptureLog 在请求缓冲还在时收下这段日志。访问日志写完、缓冲卸下后再输出。
+func CaptureLog(p []byte) bool {
+	buf, ok := sqlErrorBufs.Load(currentGID())
+	if !ok {
+		return false
+	}
+	buf.(*sqlErrorBuf).add(string(p))
+	return true
 }
 
 var sqlErrorBufs sync.Map
@@ -60,8 +70,13 @@ func (b *sqlErrorBuf) flush() {
 	msgs := b.msgs
 	b.msgs = nil
 	b.mu.Unlock()
-	for _, msg := range msgs {
+	length := len(msgs)
+	for index, msg := range msgs {
 		writeSQLError(msg)
+		if index == length-1 {
+			// 这样做的目的是确保每个请求都可以换行隔开
+			writeSQLError("\n")
+		}
 	}
 }
 

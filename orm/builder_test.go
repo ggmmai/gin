@@ -21,14 +21,18 @@ func TestSQLErrorLogFollowsRequest(t *testing.T) {
 	if buf.Len() != 0 {
 		t.Fatalf("sql error should wait for the request log, got %s", buf.String())
 	}
+	if !CaptureLog([]byte("[orm debug] sql\n")) {
+		t.Fatal("log output in a request should be captured")
+	}
 	buf.WriteString("[GIN] request\n")
 	flush()
 
 	got := buf.String()
 	ginAt := strings.Index(got, "[GIN]")
 	ormAt := strings.Index(got, "[orm]")
-	if ginAt < 0 || ormAt < 0 || ginAt > ormAt {
-		t.Fatalf("sql error should follow the request log, got %s", got)
+	debugAt := strings.Index(got, "[orm debug]")
+	if ginAt < 0 || ormAt < 0 || debugAt < 0 || ginAt > ormAt || ginAt > debugAt {
+		t.Fatalf("sql error and log output should follow the request log, got %s", got)
 	}
 }
 

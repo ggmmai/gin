@@ -51,6 +51,7 @@ func (b *OrmBuilder) queryRows() (*sql.Rows, error) {
 	b.logSQL(sqlStr, args)
 	rows, err := b.db.QueryContext(b.ctx, sqlStr, args...)
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return nil, fmt.Errorf("orm get: %w\nsql=%s args=%v", err, sqlStr, args)
 	}
 	return rows, nil
@@ -291,6 +292,7 @@ func (b *OrmBuilder) Count() (int64, error) {
 	b.logSQL(sqlStr, args)
 	var n int64
 	if err := b.db.QueryRowContext(b.ctx, sqlStr, args...).Scan(&n); err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return 0, err
 	}
 	return n, nil
@@ -307,6 +309,7 @@ func (b *OrmBuilder) Exists() (bool, error) {
 		return false, nil
 	}
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return false, err
 	}
 	return true, nil
@@ -341,6 +344,7 @@ func (b *OrmBuilder) Insert(rows ...map[string]any) (int64, error) {
 	b.logSQL(sqlStr, args)
 	res, err := b.db.ExecContext(b.ctx, sqlStr, args...)
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return 0, fmt.Errorf("orm insert: %w\nsql=%s", err, sqlStr)
 	}
 	return res.LastInsertId()
@@ -402,6 +406,7 @@ func (b *OrmBuilder) Update(data map[string]any) (int64, error) {
 	b.logSQL(sqlStr, args)
 	res, err := b.db.ExecContext(b.ctx, sqlStr, args...)
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return 0, fmt.Errorf("orm update: %w\nsql=%s", err, sqlStr)
 	}
 	return res.RowsAffected()
@@ -452,6 +457,7 @@ func (b *OrmBuilder) Truncate() error {
 	}
 	b.logSQL(sqlStr, nil)
 	if _, err := b.db.ExecContext(b.ctx, sqlStr); err != nil {
+		b.logSQLError(err, sqlStr, nil)
 		return fmt.Errorf("orm truncate: %w\nsql=%s", err, sqlStr)
 	}
 	return nil
@@ -476,6 +482,7 @@ func (b *OrmBuilder) Delete() (int64, error) {
 	b.logSQL(sqlStr, args)
 	res, err := b.db.ExecContext(b.ctx, sqlStr, args...)
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return 0, fmt.Errorf("orm delete: %w\nsql=%s", err, sqlStr)
 	}
 	return res.RowsAffected()
@@ -547,6 +554,7 @@ func (b *OrmBuilder) stepColumn[T number](name, op, column string, amount T) (in
 	b.logSQL(sqlStr, args)
 	res, err := b.db.ExecContext(b.ctx, sqlStr, args...)
 	if err != nil {
+		b.logSQLError(err, sqlStr, args)
 		return 0, fmt.Errorf("orm %s: %w\nsql=%s", name, err, sqlStr)
 	}
 	return res.RowsAffected()
