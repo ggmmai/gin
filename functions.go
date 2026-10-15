@@ -19,6 +19,8 @@ type Runtimes struct {
 	Action         string
 	HomeAdmin      string
 	Theme          string
+	IsGet          bool
+	IsPost         bool
 	Template       string
 	AppDefault     string
 	UrlMode        string
